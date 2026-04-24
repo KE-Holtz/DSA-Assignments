@@ -7,23 +7,28 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Random;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.Clip;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
-public class Simon implements ActionListener, MouseListener
-{
+public class Simon implements ActionListener, MouseListener {
 	public Renderer renderer;
 	public static final int WIDTH = 400, HEIGHT = 400;
 	public int flashed, dark, ticks, indexPattern, random;
-    public boolean creatingPattern;
+	int prevFlash = 0;
+	public boolean creatingPattern;
 	public ArrayList<Integer> pattern;
 	private boolean gameOver;
+	private boolean playGameOverAudio = true;
 
-	public Simon()
-	{
+	public Simon() {
 		JFrame frame = new JFrame("Simon");
 		Timer timer = new Timer(20, this);
 
@@ -40,103 +45,124 @@ public class Simon implements ActionListener, MouseListener
 		timer.start();
 	}
 
-	public void start()
-	{
-        random = 0;
+	public void start() {
+		random = 0;
 		pattern = new ArrayList<Integer>();
 		indexPattern = 0;
 		dark = 2;
 		flashed = 0;
-        ticks = 0;
-        creatingPattern = true;
+		ticks = 0;
+		creatingPattern = true;
 	}
 
-    @Override
-	public void actionPerformed(ActionEvent e)
-	{
+	@Override
+	public void actionPerformed(ActionEvent e) {
 		ticks++;
-		if (ticks % 20 == 0)
-		{
+		prevFlash = flashed;
+		if (ticks % 20 == 0) {
 			flashed = 0;
-			if (dark >= 0)
-			{
+			if (dark >= 0) {
 				dark--;
 			}
 		}
 
-		if(creatingPattern)
-        {
-            if (dark <= 0)
-            {
-                if (indexPattern >= pattern.size())
-                {
-                    Random random = new Random();
-					flashed = random.nextInt(4) + 1; //Generates a random # 0,1,2,3
-                    pattern.add(flashed);
-                    indexPattern = 0;
-                    creatingPattern = false;
-                }
-                else
-                {
-                    flashed = pattern.get(indexPattern);
-                    indexPattern++;
-                }
+		if (creatingPattern) {
+			if (dark <= 0) {
+				if (indexPattern >= pattern.size()) {
+					Random random = new Random();
+					flashed = random.nextInt(4) + 1; // Generates a random # 0,1,2,3
+					pattern.add(flashed);
+					indexPattern = 0;
+					creatingPattern = false;
+				} else {
+					flashed = pattern.get(indexPattern);
+					indexPattern++;
+				}
 
-                dark = 2;
-            }
-        }
-		else if (indexPattern == pattern.size())
-		{
-            creatingPattern = true;
-            indexPattern = 0;
-            dark = 2;
+				dark = 2;
+			}
+		} else if (indexPattern == pattern.size()) {
+			creatingPattern = true;
+			indexPattern = 0;
+			dark = 2;
 		}
-        renderer.repaint();
+		renderer.repaint();
 	}
 
-	public void paint(Graphics2D g)
-    {
+	public void paint(Graphics2D g) {
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-		if (flashed == 1)
-		{
+		if (flashed == 1) {
 			g.setColor(Color.GREEN);
-		}
-		else
-		{
+			if (prevFlash == 0) {
+				try {
+					File soundFile = Path.of("AudioAssets", "green.wav").toFile();
+					AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundFile);
+					Clip clip = AudioSystem.getClip();
+					clip.open(audioIn);
+					clip.start();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		} else {
 			g.setColor(Color.GREEN.darker());
 		}
 
 		g.fillRect(0, 0, WIDTH / 2, HEIGHT / 2);
 
-		if (flashed == 2)
-		{
+		if (flashed == 2) {
 			g.setColor(Color.RED);
-		}
-		else
-		{
+			if (prevFlash == 0) {
+				try {
+					File soundFile = Path.of("AudioAssets", "red.wav").toFile();
+					AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundFile);
+					Clip clip = AudioSystem.getClip();
+					clip.open(audioIn);
+					clip.start();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		} else {
 			g.setColor(Color.RED.darker());
 		}
 
 		g.fillRect(WIDTH / 2, 0, WIDTH / 2, HEIGHT / 2);
 
-		if (flashed == 3)
-		{
+		if (flashed == 3) {
 			g.setColor(Color.ORANGE);
-		}
-		else
-		{
+			if (prevFlash == 0) {
+				try {
+					File soundFile = Path.of("AudioAssets", "yellow.wav").toFile();
+					AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundFile);
+					Clip clip = AudioSystem.getClip();
+					clip.open(audioIn);
+					clip.start();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		} else {
 			g.setColor(Color.ORANGE.darker());
 		}
 
 		g.fillRect(0, HEIGHT / 2, WIDTH / 2, HEIGHT / 2);
 
-		if (flashed == 4)
-		{
+		if (flashed == 4) {
 			g.setColor(Color.BLUE);
-		}
-		else
-		{
+			if (prevFlash == 0) {
+				try {
+					File soundFile = Path.of("AudioAssets", "blue.wav").toFile();
+					AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundFile);
+					Clip clip = AudioSystem.getClip();
+					clip.open(audioIn);
+					clip.start();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		} else {
 			g.setColor(Color.BLUE.darker());
 		}
 
@@ -153,77 +179,69 @@ public class Simon implements ActionListener, MouseListener
 		g.setColor(Color.WHITE);
 		g.setFont(new Font("Arial", 1, 142));
 
-		if (gameOver)
-		{
+		if (gameOver) {
 			g.drawString(":(", WIDTH / 2 - 100, HEIGHT / 2 + 42);
+			if (playGameOverAudio) {
+				try {
+					File soundFile = Path.of("AudioAssets", "game_over.wav").toFile();
+					AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundFile);
+					Clip clip = AudioSystem.getClip();
+					clip.open(audioIn);
+					clip.start();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			playGameOverAudio = false;
 		}
 	}
 
 	@Override
-	public void mousePressed(MouseEvent e)
-	{
-        int x = e.getX();
-        int y = e.getY();
+	public void mousePressed(MouseEvent e) {
+		int x = e.getX();
+		int y = e.getY();
 
-		if (!creatingPattern && !gameOver)
-		{
-			if (x > 0 && x < WIDTH / 2 && y > 0 && y < HEIGHT / 2)
-			{
+		if (!creatingPattern && !gameOver) {
+			if (x > 0 && x < WIDTH / 2 && y > 0 && y < HEIGHT / 2) {
 				flashed = 1;
 				ticks = 1;
-			}
-			else if (x > WIDTH / 2 && x < WIDTH && y > 0 && y < HEIGHT / 2)
-			{
+			} else if (x > WIDTH / 2 && x < WIDTH && y > 0 && y < HEIGHT / 2) {
 				flashed = 2;
 				ticks = 1;
-			}
-			else if (x > 0 && x < WIDTH / 2 && y > HEIGHT / 2 && y < HEIGHT)
-			{
+			} else if (x > 0 && x < WIDTH / 2 && y > HEIGHT / 2 && y < HEIGHT) {
 				flashed = 3;
 				ticks = 1;
-			}
-			else if (x > WIDTH / 2 && x < WIDTH && y > HEIGHT / 2 && y < HEIGHT)
-			{
+			} else if (x > WIDTH / 2 && x < WIDTH && y > HEIGHT / 2 && y < HEIGHT) {
 				flashed = 4;
 				ticks = 1;
 			}
 
-			if (flashed != 0)
-			{
-				if (pattern.get(indexPattern) == flashed)
-				{
+			if (flashed != 0) {
+				if (pattern.get(indexPattern) == flashed) {
 					indexPattern++;
-				}
-				else
-				{
+				} else {
 					gameOver = true;
 				}
 			}
-		}
-		else if (gameOver)
-		{
+		} else if (gameOver) {
 			start();
 			gameOver = false;
 		}
 	}
 
 	@Override
-	public void mouseClicked(MouseEvent e)
-	{
+	public void mouseClicked(MouseEvent e) {
 	}
 
 	@Override
-	public void mouseReleased(MouseEvent e)
-	{
+	public void mouseReleased(MouseEvent e) {
 	}
 
 	@Override
-	public void mouseEntered(MouseEvent e)
-	{
+	public void mouseEntered(MouseEvent e) {
 	}
 
 	@Override
-	public void mouseExited(MouseEvent e)
-    {
-    }
+	public void mouseExited(MouseEvent e) {
+	}
 }
